@@ -25,7 +25,7 @@ let camera = new PerspectiveCamera(
   0.1,
   1000
 );
-camera.position.z = 1.4;
+camera.position.z = 0.8;
 
 let renderer = new WebGLRenderer({ antialias: true, transparent: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
