@@ -15,7 +15,7 @@ import {
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { createSculptureWithGeometry } from "https://unpkg.com/shader-park-core/dist/shader-park-core.esm.js";
-import { spCodeTexture, spCodeSphere } from "/sp-code.js";
+import { spCodeTexture, spCodeSphere, spCodeBlendShape } from "/sp-code.js";
 
 let scene = new Scene();
 
@@ -25,7 +25,7 @@ let camera = new PerspectiveCamera(
   0.1,
   1000
 );
-camera.position.z = 0.8;
+camera.position.z = 2.5;
 
 let renderer = new WebGLRenderer({ antialias: true, transparent: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -47,7 +47,7 @@ const sound = new Audio(listener);
 
 // load a sound and set it as the Audio object's buffer
 const audioLoader = new AudioLoader();
-audioLoader.load("/audio/5.mp3", function (buffer) {
+audioLoader.load("/audio/3.wav", function (buffer) {
   sound.setBuffer(buffer);
   sound.setLoop(true);
   sound.setVolume(0.5);
@@ -83,7 +83,7 @@ let geometry = new SphereGeometry(2, 45, 45);
 // let material = new MeshBasicMaterial({ color: 0x33aaee });
 // let mesh = new Mesh(geometry, material);
 
-let mesh = createSculptureWithGeometry(geometry, spCodeSphere(), () => {
+let mesh = createSculptureWithGeometry(geometry, spCodeBlendShape(), () => {
   return {
     time: state.time,
     pointerDown: state.pointerDown,
@@ -137,7 +137,7 @@ let render = () => {
   state.pointerDown = 0.1 * state.currPointerDown + 0.9 * state.pointerDown;
   state.mouse.lerp(state.currMouse, 0.05);
 
-  let analysis = Math.pow((analyser.getFrequencyData()[2] / 255) * 0.95, 8);
+  let analysis = Math.pow((analyser.getFrequencyData()[2] / 255) * 0.85, 8);
   state.currAudio += analysis + clock.getDelta() * 0.5;
   state.audio = 0.2 * state.currAudio + 0.8 * state.audio;
 

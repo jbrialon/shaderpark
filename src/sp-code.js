@@ -48,4 +48,51 @@ const spCodeSphere = () => {
     `;
 };
 
-export { spCodeTexture, spCodeSphere };
+const spCodeBlendShape = () => {
+    return `
+    let audio = input();
+    let pointerDown = input();
+
+    lightDirection(getRayDirection());
+    metal(.4);
+    shine(.7);
+    
+    let sCurve = shape((size, innerOffset) => {
+      sphere(size);
+      difference();
+      let s = getSpace();
+      displace(0.1, innerOffset, s.z);
+      sphere(size-.03);
+      expand(.00)
+    })
+    
+    
+    let s = getSpace();
+    let col2 = vec3(0, .1, length(normal));
+
+    let hue = .5 + sin(audio) * .13;
+    let col= hsv2rgb(vec3(hue, .9, .5));
+    color(col);
+
+    color(col+normal*.1)
+    rotateX((sin(time))*.04);
+    rotateZ((sin(time))*.04);
+    rotateY((cos(time))*.1);
+    
+    shape(() => {
+      for(let i = 0; i < 3; i++) {
+        blend(.1);
+        // let rot = 4 * sin(time * .2) * .5 * audio;
+        let rot = audio;
+        rotateX(rot);
+        rotateY(rot);
+        rotateZ(rot);
+        sCurve(1*(i/3)+.3, .2);
+      }
+      sphere(.15);
+    })();
+    mixGeo(nsin(audio)*.22+.9);
+    sphere(.8)
+    `;
+}
+export { spCodeTexture, spCodeSphere, spCodeBlendShape };
