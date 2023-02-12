@@ -53,6 +53,8 @@ const spCodeBlendShape = () => {
     let audio = input();
     let pointerDown = input();
 
+    setMaxIterations(10);
+
     lightDirection(getRayDirection());
     metal(.4);
     shine(.7);
