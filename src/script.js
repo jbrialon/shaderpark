@@ -76,19 +76,19 @@ let state = {
 };
 
 // create our geometry and material
-//let geometry = new SphereGeometry(2, 45, 45);
+let geometryShader = new THREE.SphereGeometry(2, 45, 45);
 // let material = new MeshBasicMaterial({ color: 0x33aaee });
 // let mesh = new Mesh(geometry, material);
 
-// let mesh = createSculptureWithGeometry(geometry, spCodeTexture(), () => {
-//   return {
-//     time: state.time,
-//     pointerDown: state.pointerDown,
-//     mouse: state.mouse,
-//     audio: state.audio,
-//     _scale: 0.5,
-//   };
-// });
+let mesh = createSculptureWithGeometry(geometryShader, spCodeTexture(), () => {
+  return {
+    time: state.time,
+    pointerDown: state.pointerDown,
+    mouse: state.mouse,
+    audio: state.audio,
+    _scale: 0.5,
+  };
+});
 
 // scene.add(mesh);
 
@@ -137,6 +137,7 @@ const addToPosition = (y) => {
   const lastPos = new THREE.Vector3(indexPosition / 500, y, 1);
   points.push(lastPos);
   camera.position.x = indexPosition / 500;
+  geometryShader.x = indexPosition / 500;
   parameters.linewidth = Math.max(10, y * 100);
   // camera.rotation.y = 10;
 };
