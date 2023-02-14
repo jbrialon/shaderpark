@@ -1,5 +1,11 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import {
+  MeshLine,
+  MeshLineGeometry,
+  MeshLineMaterial,
+} from "@lume/three-meshline";
+
 import { createSculptureWithGeometry } from "https://unpkg.com/shader-park-core/dist/shader-park-core.esm.js";
 import { spCodeTexture, spCodeSphere } from "/sp-code.js";
 
@@ -41,7 +47,7 @@ const sound = new THREE.Audio(listener);
 
 // load a sound and set it as the Audio object's buffer
 const audioLoader = new THREE.AudioLoader();
-audioLoader.load("/audio/3.wav", function (buffer) {
+audioLoader.load("/audio/7.mp3", function (buffer) {
   sound.setBuffer(buffer);
   sound.setLoop(true);
   sound.setVolume(0.5);
@@ -56,7 +62,6 @@ audioLoader.load("/audio/3.wav", function (buffer) {
 
 // create an AudioAnalyser, passing in the sound and desired fftSize
 const analyser = new THREE.AudioAnalyser(sound, 32);
-console.log(analyser);
 // get the average frequency of the sound
 const data = analyser.getAverageFrequency();
 let state = {
@@ -92,95 +97,53 @@ let state = {
  */
 
 const parameters = {
-  count: 100000,
-  size: 0.01,
-  radius: 5,
-  branches: 3,
-  spin: 1,
-  randomness: 0.2,
-  randomnessPower: 3,
-  insideColor: "#ff7300",
-  outsideColor: "#ffffff",
+  color: "#ff7300",
+  linewidth: 10,
 };
-
+var resolution = new THREE.Vector2(window.innerWidth, window.innerHeight);
 let geometry = null;
 let material = null;
-let points = null;
+let line = null;
 let indexPosition = 0;
-let positions = new Float32Array(3000 * 3 * 3);
+let points = [];
 
-const generatePoints = () => {
-  if (points !== null) {
+const generateLine = () => {
+  if (line !== null) {
     geometry.dispose();
     material.dispose();
-    scene.remove(points);
+    scene.remove(line);
   }
 
-  geometry = new THREE.BufferGeometry();
-  // const positions = new Float32Array(parameters.count * 3 * 3);
-  const colorsArray = new Float32Array(parameters.count * 3 * 3);
+  geometry = new MeshLineGeometry();
+  geometry.setPoints(points);
 
-  // for (let index = 0; index < parameters.count * 3 * 3; index++) {
-  //   const i3 = index * 3;
-
-  //   positions[i3 + 0] = index / 100; // AXE X
-  //   positions[i3 + 1] = Math.sin(index / 100, 3); // AXE Y
-  //   positions[i3 + 2] = 1; // AYE Z
-  // }
-  const positionsAttribute = new THREE.BufferAttribute(positions, 3);
-
-  geometry.setAttribute("position", positionsAttribute);
-
-  material = new THREE.PointsMaterial({
-    size: 0.01,
-    sizeAttenuation: true,
-    transparent: true,
-    // color: '#ff88cc',
-    // alphaTest: 0.001,
-    // depthTest: false,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    vertexColors: true,
+  material = new MeshLineMaterial({
+    useMap: false,
+    color: new THREE.Color(parameters.color),
+    opacity: 1,
+    resolution: resolution,
+    sizeAttenuation: false,
+    lineWidth: parameters.linewidth,
   });
 
-  // Points
-  points = new THREE.Points(geometry, material);
-  scene.add(points);
+  // Line
+  line = new MeshLine(geometry, material);
+  scene.add(line);
 };
 
-generatePoints();
+generateLine();
 
 const addToPosition = (y) => {
-  const index = indexPosition;
-  const i3 = index * 3;
-
-  positions[i3 + 0] = index / 500; // AXE X
-  positions[i3 + 1] = y; // AXE Y
-  positions[i3 + 2] = 1; // AYE Z
+  const lastPos = new THREE.Vector3(indexPosition / 500, y, 1);
+  points.push(lastPos);
+  camera.position.x = indexPosition / 500;
+  parameters.linewidth = Math.max(10, y * 100);
+  // camera.rotation.y = 10;
 };
 
-const paramFolder = gui.addFolder("Curve generatePoints");
-paramFolder
-  .add(parameters, "count", 0, 1000000, 100)
-  .onFinishChange(generatePoints);
-paramFolder
-  .add(parameters, "size", 0.001, 0.1, 0.001)
-  .onFinishChange(generatePoints);
-paramFolder
-  .add(parameters, "radius", 0.01, 20, 0.01)
-  .onFinishChange(generatePoints);
-paramFolder
-  .add(parameters, "branches", 2, 20, 1)
-  .onFinishChange(generatePoints);
-paramFolder.add(parameters, "spin", -5, 5, 1).onFinishChange(generatePoints);
-paramFolder
-  .add(parameters, "randomness", 0, 2, 0.01)
-  .onFinishChange(generatePoints);
-paramFolder
-  .add(parameters, "randomnessPower", 1, 10, 1)
-  .onFinishChange(generatePoints);
-paramFolder.addColor(parameters, "insideColor").onFinishChange(generatePoints);
-paramFolder.addColor(parameters, "outsideColor").onFinishChange(generatePoints);
+const paramFolder = gui.addFolder("Curve generateLine");
+paramFolder.addColor(parameters, "color").onFinishChange(generateLine);
+paramFolder.add(parameters, "linewidth").onFinishChange(generateLine);
 
 window.addEventListener(
   "pointermove",
@@ -231,9 +194,14 @@ let render = () => {
   if (analysis) {
     indexPosition++;
     addToPosition(analysis);
-    generatePoints();
+    generateLine();
   }
-  controls.update();
+
+  camera.rotation.x = -0.03645093342527904;
+  camera.rotation.y = 0.5617532931037452;
+  camera.rotation.z = 0.019422511558217;
+
+  // controls.update();
   renderer.render(scene, camera);
 };
 
