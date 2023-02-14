@@ -89,7 +89,7 @@ let mesh = createSculptureWithGeometry(geometryShader, spCodeTexture(), () => {
     _scale: 0.5,
   };
 });
-
+console.log("deploy");
 // scene.add(mesh);
 
 /**
